@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Scratch</title>
+    <link href="css/styles.css" rel="stylesheet" />
+</head>
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Scratch — Tableau Embed</title>
+        <link href="css/styles.css" rel="stylesheet" />
+        <style>
+            :root { --gap: 20px; }
+            body { font-family: Arial, Helvetica, sans-serif; margin: 0; }
+            header, footer { background: #f8f9fa; padding: 16px; }
+            header nav a { color: #333; text-decoration: none; margin-right: 8px; }
+            .page { padding: 24px; }
+            .container { display: flex; gap: var(--gap); align-items: flex-start; }
+            /* Make the viz occupy 50% of the workspace */
+            .viz-wrapper { flex: 0 0 50%; }
+            .viz-wrapper .tableauPlaceholder { width: 100%; }
+            .viz-wrapper object.tableauViz { display: block; width: 100%; border: 1px solid #e0e0e0; border-radius: 6px; }
+            .side { flex: 1; min-width: 0; }
+            textarea { width: 100%; box-sizing: border-box; }
+            @media (max-width: 900px) {
+                .container { flex-direction: column; }
+                .viz-wrapper { flex-basis: auto; }
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <nav>
+                <a href="index.html">Home</a>
+                <span>·</span>
+                <a href="resume.html">Resume</a>
+                <span>·</span>
+                <a href="projects.html">Projects</a>
+                <span>·</span>
+                <strong>Scratch</strong>
+            </nav>
+        </header>
+
+        <main class="page">
+            <div class="container">
+                <div class="viz-wrapper">
+                    <div class="tableauPlaceholder" id="viz1776193544542" style="position: relative">
+                        <noscript>
+                            <a href="#"><img alt="Tableau visualization" src="https://public.tableau.com/static/images/8F/8FFH9ZD2J/1_rss.png" style="border: none" /></a>
+                        </noscript>
+                        <object class="tableauViz">
+                            <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
+                            <param name="embed_code_version" value="3" />
+                            <param name="path" value="shared/8FFH9ZD2J" />
+                            <param name="toolbar" value="yes" />
+                            <param name="static_image" value="https://public.tableau.com/static/images/8F/8FFH9ZD2J/1.png" />
+                            <param name="animate_transition" value="yes" />
+                            <param name="display_static_image" value="yes" />
+                            <param name="display_spinner" value="yes" />
+                            <param name="display_overlay" value="yes" />
+                            <param name="display_count" value="yes" />
+                            <param name="language" value="en-US" />
+                        </object>
+                    </div>
+                </div>
+
+                <aside class="side">
+                    <h1>Scratch</h1>
+                    <p>Tableau workbook is embedded to occupy 50% of the page width. Use the control below to update the embed URL if needed.</p>
+                    <label style="display:block; margin-bottom:8px; font-weight:600">Workbook embed URL</label>
+                    <input id="workbookUrl" type="text" value="https://public.tableau.com/views/8FFH9ZD2J" style="width:100%; margin-bottom:8px;" />
+                    <button id="updateBtn" style="padding:8px 12px; margin-bottom:12px;">Update iframe src</button>
+                    <textarea placeholder="Notes or experiments go here" style="height:200px"></textarea>
+                </aside>
+            </div>
+        </main>
+
+        <footer>
+            <small>© Your Website</small>
+        </footer>
+
+        <script>
+            // Resize the Tableau object to keep a consistent aspect ratio
+            function resizeViz() {
+                var divElement = document.getElementById('viz1776193544542');
+                if (!divElement) return;
+                var vizElement = divElement.getElementsByTagName('object')[0];
+                if (!vizElement) return;
+                var width = divElement.offsetWidth;
+                // keep 4:3 aspect ratio (height = width * 0.75)
+                vizElement.style.width = '100%';
+                vizElement.style.height = Math.round(width * 0.75) + 'px';
+            }
+
+            window.addEventListener('load', function () {
+                resizeViz();
+                // load Tableau JS API
+                var divElement = document.getElementById('viz1776193544542');
+                var vizElement = divElement && divElement.getElementsByTagName('object')[0];
+                if (vizElement) {
+                    var scriptElement = document.createElement('script');
+                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                    vizElement.parentNode.insertBefore(scriptElement, vizElement);
+                }
+            });
+            window.addEventListener('resize', resizeViz);
+
+            // quick control to update embed URL (replaces the path param)
+            document.addEventListener('click', function (e) {
+                if (e.target && e.target.id === 'updateBtn') {
+                    var url = document.getElementById('workbookUrl').value.trim();
+                    if (!url) return;
+                    // if user pasted a full tableau url, use it directly by setting the static image and path roughly
+                    var path = url;
+                    try {
+                        var u = new URL(url);
+                        path = u.pathname.replace(/^\//, '');
+                    } catch (err) {
+                        path = url;
+                    }
+                    var placeholder = document.getElementById('viz1776193544542');
+                    var obj = placeholder.getElementsByTagName('object')[0];
+                    // update params where possible
+                    var params = obj.getElementsByTagName('param');
+                    for (var i = 0; i < params.length; i++) {
+                        var name = params[i].getAttribute('name');
+                        if (name === 'path') params[i].setAttribute('value', path);
+                        if (name === 'static_image') params[i].setAttribute('value', url + '/1.png');
+                    }
+                    // reload viz by re-inserting script
+                    var script = document.createElement('script');
+                    script.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+                    obj.parentNode.insertBefore(script, obj);
+                }
+            });
+        </script>
+    </body>
+</html>
+                value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;8F&#47;8FFH9ZD2J&#47;1.png' />
+            <param name='animate_transition' value='yes' />
+            <param name='display_static_image' value='yes' />
+            <param name='display_spinner' value='yes' />
+            <param name='display_overlay' value='yes' />
+            <param name='display_count' value='yes' />
+            <param name='language' value='en-US' />
+        </object></div>
+    <script
+        type='text/javascript'>                    var divElement = document.getElementById('viz1776193544542'); var vizElement = divElement.getElementsByTagName('object')[0]; if (divElement.offsetWidth > 800) { vizElement.style.width = '100%'; vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px'; } else if (divElement.offsetWidth > 500) { vizElement.style.width = '100%'; vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px'; } else { vizElement.style.width = '100%'; vizElement.style.height = '2477px'; } var scriptElement = document.createElement('script'); scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js'; vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>
+
+</body>
+
+</html>
